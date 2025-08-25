@@ -1,14 +1,21 @@
-import { NavLink } from "react-router-dom";
+import { signOut } from "@aws-amplify/auth";
+import { NavLink, useNavigate } from "react-router-dom";
 
 type NavBarProps = {
   userName: string | undefined;
+  setUserNameCb: (userName: string) => void;
 };
-export default function NavBar({ userName }: NavBarProps) {
+export default function NavBar({ userName, setUserNameCb }: NavBarProps) {
 
+  const navigate = useNavigate();
   function renderLoginLogout() {
     if (userName) {
       return (
-        <NavLink to="/logout">
+        <NavLink onClick={async()=>{
+          await signOut();
+          setUserNameCb('');
+          navigate('/');
+        }} to="/logout">
           {userName}
         </NavLink>
       );

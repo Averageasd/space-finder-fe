@@ -2,16 +2,24 @@ import { useState } from 'react'
 import './App.css'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import NavBar from './components/NavBar'
+import LoginComponent from './components/LoginComponent';
+import { AuthService } from './services/AuthService';
+import CreateSpace from './components/CreateSpace';
+import { DataService } from './services/DataService';
+
+const authService = new AuthService();
+const dataService = new DataService(authService);
 
 function App() {
   
   const [userName, setUserName] = useState<string | undefined>(undefined);
 
+
   const router = createBrowserRouter([
     {
       element: (
         <>
-          <NavBar userName={userName}/>
+          <NavBar userName={userName} setUserNameCb={setUserName}/>
           <Outlet />
         </>
       ),
@@ -22,7 +30,7 @@ function App() {
         },
         {
           path: "/login",
-          element: <div>Login page</div>,
+          element: <LoginComponent authService={authService} setUserNameCb={setUserName}/>,
         },
         {
           path: "/profile",
@@ -30,12 +38,17 @@ function App() {
         },
         {
           path: "/createSpace",
-          element: <div>Create page</div>,
+          element: <CreateSpace dataService={dataService}/>
         },
         {
           path: "/spaces",
           element: <div>Space page </div>,
         },
+        {
+          path: '/logout',
+          element: <></>
+        },
+
       ]
     },
   ]);
