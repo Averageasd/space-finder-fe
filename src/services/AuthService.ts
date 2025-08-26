@@ -82,8 +82,7 @@ export class AuthService {
             })
         });
         const credentials = await cognitoIdentity.config.credentials();
-        this.temporaryCredentials = credentials;
-        return this.temporaryCredentials;
+        return credentials;
 
     }
 
@@ -93,7 +92,7 @@ export class AuthService {
 
 
     public getIdToken(): string{
-       return this.jwtToken as string;
+       return this.jwtToken;
     }
 
 
