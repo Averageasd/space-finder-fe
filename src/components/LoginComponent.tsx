@@ -1,6 +1,6 @@
 import { SyntheticEvent, useState } from "react";
 import { AuthService } from "../services/AuthService";
-import { SignInOutput } from "@aws-amplify/auth";
+import { AuthUser, SignInOutput } from "@aws-amplify/auth";
 import { Navigate } from "react-router-dom";
 
 type LoginProps = {
@@ -19,6 +19,11 @@ export default function LoginComponent({ authService, setUserNameCb }: LoginProp
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
     if (userName && password) {
+      if (await authService.getCurrentUser()){
+          setUserNameCb(((await authService.getCurrentUser()).username));
+          setLoginSuccess(true);
+          return;
+      }
       const loginResponse = await authService.login(userName, password);
       console.log(loginResponse, ' from LoginComponent');
       const userName2 = authService.getUserName();

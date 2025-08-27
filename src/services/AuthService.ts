@@ -1,4 +1,4 @@
-import { SignInOutput, fetchAuthSession, signIn, confirmSignIn} from "@aws-amplify/auth";
+import { SignInOutput, fetchAuthSession, signIn, confirmSignIn, getCurrentUser, AuthUser} from "@aws-amplify/auth";
 import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { Amplify } from "aws-amplify";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-providers";
@@ -20,8 +20,13 @@ export class AuthService {
     private user: SignInOutput | undefined;
     private userName: string = '';
     private jwtToken: string | undefined;
+    private authUser: AuthUser | undefined;
     private temporaryCredentials: object | undefined;
 
+    public alreadyLoggedIn(){
+        return this.authUser;
+        
+    }
 
     public async login(userName: string, password: string): Promise<object | undefined> {
         try {
@@ -36,6 +41,7 @@ export class AuthService {
             this.user = signInOutput;
             this.userName = userName;
             if (signInOutput.isSignedIn){
+                this.authUser = await this.getCurrentUser();
                 await this.generateIdToken();
             }
             return signInOutput;
@@ -52,6 +58,7 @@ export class AuthService {
             });
             if (signIn.isSignedIn){
                 await this.generateIdToken();
+                this.authUser = await this.getCurrentUser();
             }
             return signIn.isSignedIn;
         }
@@ -86,7 +93,7 @@ export class AuthService {
 
     }
 
-    private async generateIdToken(){
+    public async generateIdToken(){
         this.jwtToken = (await fetchAuthSession()).tokens?.idToken?.toString();
     }
 
@@ -99,5 +106,19 @@ export class AuthService {
 
     public getUserName(): string {
         return this.userName;
+    }
+
+    public async getCurrentUser() {
+        try{
+            this.authUser = await getCurrentUser();
+            await this.generateIdToken();
+            return this.authUser;
+        }
+        catch(error){
+            console.log(error);
+            this.authUser = undefined;
+            return undefined;
+        }
+        
     }
 }

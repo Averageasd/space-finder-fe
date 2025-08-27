@@ -13,11 +13,27 @@ export class DataService {
     }
 
     public async createSpace(name: string, location:string, photo?: File){
+        const space = {} as any;
+        space.name = name;
+        space.location = location;
         if (photo){
             const uploadUrl = await this.uploadPublicFile(photo);
+            space.photoUrl = uploadUrl;
             console.log(uploadUrl);
         }
-        return '123'
+
+        console.log(this.authService.getIdToken());
+
+        const postResult = await fetch('https://wfnwegikw1.execute-api.us-east-1.amazonaws.com/prod/spaces',
+            {
+                method: 'POST',
+                body: JSON.stringify(space),
+                headers: {
+                    'Authorization' : this.authService.getIdToken()
+                }
+            }
+        )
+        return await postResult.json();
     }
 
     private async uploadPublicFile(file: File){
@@ -49,6 +65,6 @@ export class DataService {
     }
 
     public isAuthorized(){
-        return true;
+        return this.authService.alreadyLoggedIn();
     }
 }
